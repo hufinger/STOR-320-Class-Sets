@@ -1,0 +1,117 @@
+---
+title: "Lab 3"
+author: "Hunter Finger"
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Instructions
+
+**Exercises:**  1,3 (Pgs. 90-91); 1 (Pg. 93); 2,4 (Pg. 99); 1,2 (Pg. 101); 2,3,5 (Pg. 104)
+
+**Assigned:** Friday, February 8, 2019
+
+**Due:** Friday, February 15, 2019 by 5:00 PM
+
+**Submission:** Submit via an electronic document on Sakai. Must be submitted as a HTML file generated in RStudio. All assigned problems are chosen according to the textbook *R for Data Science*. You do not need R code to answer every question. If you answer without using R code, delete the code chunk. If the question requires R code, make sure you display R code. If the question requires a figure, make sure you display a figure. A lot of the questions can be answered in written response, but require R code and/or figures for understanding and explaining.
+
+```{r, include=FALSE}
+library(tidyverse)
+library(lvplot)
+library(nycflights13)
+```
+
+# Chapter 5 (Pgs. 90-91)
+
+##  Exercise 1
+```{r}
+ggplot(data = diamonds) + geom_point(mapping = aes(x = x, y=y))
+ggplot(data = diamonds) + geom_point(mapping = aes(x = y, y=z))+labs(x = 'y', y = 'z')
+ggplot(data = diamonds) + geom_point(mapping = aes(x = x, y=z))+labs(y = 'z')
+```
+
+Y and Z both have outliers as seen in the graphs above. Y is always the largest value which leads me to believe it is width. X is always the smallest. Z typically sits in the middle and is the thickness of the diamond. These measurements make sense because a diamond is always wider end to end than it is across. 
+
+##  Exercise 3
+```{r}
+carat_count <- diamonds %>% filter(carat >= .99, carat <=1) %>% count(carat)
+
+head(carat_count)
+```
+There are subsantially more 1 carat diamonds than .99 carat diamonds. I think that the carat is being rounded to the nearest number possibly to inflate the price because a 1 carat diamond is worth more. 
+
+# Chapter 5 (Pg. 93)
+
+##  Exercise 1
+```{r}
+diamonds2 <- diamonds %>% mutate(y = ifelse(y < 3 | y > 20, NA, y)) %>% mutate(cut = ifelse(cut < 1, NA, cut))
+ggplot(data = diamonds2, aes(x=y)) +geom_histogram()
+ggplot(data = diamonds2) + geom_bar(mapping=aes(x=cut))
+
+```
+
+The histogram removes NA values as shown in the warning. The bar graph counts NA as another variable as seen by me making everything in cut = NA.
+
+# Chapter 5 (Pg. 99)
+
+##  Exercise 2
+```{r}
+ggplot(diamonds) + geom_point(mapping = aes(x = carat, y = price))
+ggplot(diamonds) + geom_boxplot(mapping = aes(x = cut, y = price))
+ggplot(diamonds) + geom_boxplot(mapping = aes(x = color, y = price))
+ggplot(diamonds) + geom_boxplot(mapping = aes(x = clarity, y = price))
+ggplot(diamonds) + geom_point(mapping = aes(x = carat, y = price, color = cut))
+```
+
+The strongest coorelation is between carat and price. As the carats go up, the price gets much more expensive. The correlation between cut and carat is that as the carrots go up, the cut gets much worse. However, since carat is the strongest correlation to price, the poorly cut large diamonds are the most expensive.
+
+##  Exercise 4
+```{r}
+ggplot(data = diamonds) + geom_lv(mapping = aes(x = cut, y = price))
+```
+
+The size of the boxes correlates to the quantity of diamonds in each quartile. This shows that the vast majority of diamonds are priced cheaper which lead to so many outliers in the earlier box plot.
+
+# Chapter 5 (Pg. 101)
+
+##  Exercise 1
+```{r}
+diamonds %>% count(color, cut) %>% group_by(color) %>% mutate(proportion = n / sum(n)) %>% ggplot() + geom_tile(mapping=aes(x = color, y = cut, fill = proportion))
+```
+
+##  Exercise 2
+```{r}
+flights %>% group_by(dest, month) %>% summarize(dep_delay = mean(dep_delay, na.rm = TRUE)) %>% ggplot(mapping = aes(x = month, y = dest, fill = dep_delay)) + geom_tile()
+```
+
+The result is very crowded with colors and destination names being very close together and the months being shown in strange ways. One way to change make this better is to lable the months 1 through 12. Another thing to do is to try to sort the destinations by highest delay average before we map the data.
+
+```{r}
+flights %>% group_by(dest, month) %>% summarize(dep_delay = mean(dep_delay, na.rm = TRUE)) %>% filter(n() == 12) %>% arrange(dest, dep_delay) %>% ggplot(mapping = aes(x = factor(month), y = dest, fill = dep_delay)) + geom_tile()
+```
+
+# Chapter 5 (Pg. 104)
+
+##  Exercise 2
+```{r}
+ggplot(data = diamonds, aes(x = cut_number(price, 10), y = carat)) +
+  geom_boxplot() +
+  coord_flip()
+```
+
+##  Exercise 3
+
+Using the distribution from above the price variation does not really suprise me. The bigger a diamond gets, the more expensive it is, and the larger the variation in price. I assume that this greater variation is cause by the color and clarity of the larger diamonds. The smaller diamonds are all closer in price because the cut and clarity is more similar than with the larger diamonds. 
+
+##  Exercise 5
+```{r}
+ggplot(data = diamonds) +
+geom_point(mapping = aes(x = x, y = y)) +
+coord_cartesian(xlim = c(4, 11), ylim = c(4, 11))
+```
+
+The scatterplot is the best plot in this case because the outliers are very obvious. The vast majority of the data is collected around the regression line and the outliers are the only points that stray away from the group.

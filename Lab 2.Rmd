@@ -1,0 +1,94 @@
+---
+title: "Lab 2"
+author: "Mario Giacomazzo"
+date: "August 25, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Instructions
+
+**Exercises:**  1-3 (Pgs. 49-50); 2-4 (Pg. 51); 2,4 (Pg. 54); 1-4 (Pg. 58)
+
+**Assigned:** Friday, August 31, 2018
+
+**Due:** Friday, September 7, 2018 by 5:00 PM
+
+**Submission:** Submit via an electronic document on Sakai. Must be submitted as a html file generated in RStudio. All assigned problems are chosen according to the textbook *R for Data Science*. 
+
+```{r, include=FALSE}
+library(tidyverse)
+library(ggplot2)
+library(nycflights13)
+```
+
+# Chapter 3 (Pgs. 49-50)
+
+##  Exercise 1
+```{r}
+#
+```
+
+##  Exercise 2
+```{r}
+#
+```
+
+##  Exercise 3
+```{r}
+#
+```
+
+# Chapter 3 (Pg. 51)
+
+##  Exercise 2
+```{r}
+#
+```
+
+##  Exercise 3
+```{r}
+#
+```
+
+##  Exercise 4
+```{r}
+#
+```
+
+# Chapter 3 (Pg. 54)
+
+##  Exercise 2
+```{r}
+#
+```
+
+##  Exercise 4
+```{r}
+#
+```
+
+# Chapter 3 (Pg. 58)
+
+##  Exercise 1
+```{r}
+#
+```
+
+##  Exercise 2
+```{r}
+#
+```
+
+##  Exercise 3
+```{r}
+#
+```
+
+##  Exercise 4
+```{r}
+#
+```

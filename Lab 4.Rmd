@@ -1,0 +1,174 @@
+---
+title: "Lab 4"
+author: "Hunter Finger"
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Instructions
+
+**Exercises:**  2,3 (Pg. 151); 2,4 (Pg. 156); 1,2 (Pgs. 160-161); 2 (Pg. 163); 2,3,4 (Pg. 168)
+
+**Assigned:** Friday, February 15, 2019
+
+**Due:** Friday, February 22, 2019 by 5:00 PM
+
+**Submission:** Submit via an electronic document on Sakai. Must be submitted as a HTML file generated in RStudio. All assigned problems are chosen according to the textbook *R for Data Science*. You do not need R code to answer every question. If you answer without using R code, delete the code chunk. If the question requires R code, make sure you display R code. If the question requires a figure, make sure you display a figure. A lot of the questions can be answered in written response, but require R code and/or figures for understanding and explaining.
+
+```{r, include=FALSE}
+library(tidyverse)
+```
+
+# Chapter 9 (Pg. 151)
+
+##  Exercise 2
+```{r}
+t2_cases <- filter(table2, type == "cases") %>% rename(cases = count) %>% arrange(country, year)
+t2_popl <- filter(table2, type == "population") %>% rename(population = count) %>% arrange(country, year)
+t2_case_per_capita = tibble(year = t2_cases$year, country = t2_cases$country, cases = t2_cases$cases, population = t2_popl$population) %>% mutate(cases_per_cap = (cases/population)*10000) %>% select(country, year, cases_per_cap, cases)
+
+head(t2_case_per_capita)
+
+table4_combined = tibble(country = table4a$country, '1999' = table4a[["1999"]]/table4b[["1999"]] * 10000, '2000' = table4a[["2000"]]/table4b[["2000"]] * 10000)
+
+head(table4_combined)
+```
+
+I thought that table 4 was easier to work with because it was easy to divide cases by population since they were in two sepatare tables. Table 2 took more work because I had to create two tables for cases and population and then combine them for cases per 10000 people. 
+
+##  Exercise 3
+
+First, we need to filter the table by cases. Then we plot the changes by year as shown below. 
+
+```{r}
+table2 %>% filter(type == "cases") %>% ggplot(aes(year, count)) + geom_point(aes(color = country)) + geom_line(aes(group = country))
+```
+
+# Chapter 9 (Pg. 156)
+
+##  Exercise 2
+
+table4a %>%
+  gather(1999, 2000, key = "year", value = "cases")
+
+
+Gather fails in this case because the values of 1999 and 2000 are read as the 1999th and 2000th column in the dataset. To fix this, we add ' ' around the variable names.
+
+```{r}
+table4a %>%
+  gather('1999', '2000', key = "year", value = "cases")
+```
+
+##  Exercise 4
+```{r}
+preg <- tribble(
+~pregnant, ~male, ~female, "yes", NA, 10, "no", 20, 12
+)
+
+preg_clean <- preg %>% gather(male, female, key = "gender", value = "count")
+
+head(preg_clean)
+```
+
+The data set needs to be gathered. The variables are gender, count, and pregnant.
+
+# Chapter 9 (Pgs. 160-161)
+
+##  Exercise 1
+```{r}
+tibble(x = c("a,b,c", "d,e,f,g", "h,i,j")) %>%
+      separate(x, c("one", "two", "three"))
+
+tibble(x = c("a,b,c", "d,e,f,g", "h,i,j")) %>%
+      separate(x, c("one", "two", "three"), extra = "drop")
+
+tibble(x = c("a,b,c", "d,e", "f,g,i")) %>%
+      separate(x, c("one", "two", "three"))
+
+tibble(x = c("a,b,c", "d,e", "f,g,i")) %>%
+      separate(x, c("one", "two", "three"), fill = "left")
+```
+
+The **fill** argument tells the dataset how to fill the data if you have too few data. In the 3rd tibble, the second group is short 1 piece of data resulting in the NA value being on the right. When I set fill to left, the NA value is now places at the beginning of the set of values. 
+
+The **extra** argument tells the separate what to do with extra values. In the first tibble, the 2nd group has too many values and the resulting table shows a warning. By setting extra to drop, the same thing happens, but without the warning.
+
+##  Exercise 2
+```{r}
+table3 %>%
+    separate(rate, into = c("cases", "population"), remove = TRUE)
+
+table3 %>%
+    separate(rate, into = c("cases", "population"), remove = FALSE)
+```
+
+The remove argument is used to discard the old input columns. The reasoning for it being false would be if you wanted to create a new variable with the old one. 
+
+# Chapter 9 (Pg. 163)
+
+##  Exercise 2
+```{r}
+treatment <- tribble(
+~ person, ~ treatment, ~response, "Derrick Whitmore", 1, 7,
+NA, 2, 10,
+NA, 3, 9, "Katherine Burke", 1, 4
+)
+
+treatment %>%
+      fill(person, .direction = "down")
+
+treatment %>%
+      fill(person, .direction = "up")
+```
+
+The **direction** tells fill whether to fill the NA values top down (down) or bottom up (up).
+
+# Chapter 9 (Pg. 168)
+
+##  Exercise 2
+```{r}
+who %>%
+gather(code, value, new_sp_m014:newrel_f65, na.rm = TRUE) %>% mutate(
+        code = stringr::str_replace(code, "newrel", "new_rel")
+      ) %>%
+      separate(code, c("new", "var", "sexage")) %>%
+      select(-new, -iso2, -iso3) %>%
+      separate(sexage, c("sex", "age"), sep = 1)
+
+who %>%
+gather(code, value, new_sp_m014:newrel_f65, na.rm = TRUE) %>% 
+      separate(code, c("new", "var", "sexage")) %>%
+      select(-new, -iso2, -iso3) %>%
+      separate(sexage, c("sex", "age"), sep = 1)
+```
+
+The mutate step fills in the values for the missing information in the lower rows in the dataset.
+
+##  Exercise 3
+```{r}
+select(who, country, iso2, iso3) %>% distinct() %>% group_by(country) %>% filter(n() > 1)
+```
+
+All the codes are differing by just 1 because the iso3 just adds a character to the iso2 code.
+
+##  Exercise 4
+```{r}
+who_visual = who %>%
+gather(code, value, new_sp_m014:newrel_f65, na.rm = TRUE) %>% mutate(
+        code = stringr::str_replace(code, "newrel", "new_rel")
+      ) %>%
+      separate(code, c("new", "var", "sexage")) %>%
+      select(-new, -iso2, -iso3) %>%
+      separate(sexage, c("sex", "age"), sep = 1)
+
+head(who_visual)
+
+who_visual %>% group_by(country, year, sex) %>% filter(year > 1998) %>% summarize(cases = sum(value)) %>% unite(country_by_sex, country, sex, remove = FALSE) %>% filter(cases > 100000) %>% ggplot(aes(x = year, y = cases, color = country_by_sex)) +
+  geom_line()
+```
+
+Above is all the counties with more than 100000 cases per sex. I filtered to this becuase otherwise there were many countries in the data set and it looked cluttered, so I focused on the countries with the most cases.
