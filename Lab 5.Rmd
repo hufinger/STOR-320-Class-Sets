@@ -1,0 +1,79 @@
+---
+title: "Lab 5"
+author: "Hunter Finger"
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Instructions
+
+**Exercises:**  1,3 (Pg. 227); 2 (Pg. 232); 1,2 (Pg. 235); 
+
+**Assigned:** Friday, March 1, 2019
+
+**Due:** Friday, March 8, 2019 by 5:00 PM
+
+**Submission:** Submit via an electronic document on Sakai. Must be submitted as a HTML file generated in RStudio. All assigned problems are chosen according to the textbook *R for Data Science*. You do not need R code to answer every question. If you answer without using R code, delete the code chunk. If the question requires R code, make sure you display R code. If the question requires a figure, make sure you display a figure. A lot of the questions can be answered in written response, but require R code and/or figures for understanding and explaining.
+
+```{r, include=FALSE}
+library(tidyverse)
+library(forcats)
+```
+
+# Chapter 12 (Pg. 227)
+
+##  Exercise 1
+```{r}
+rincome_bar <- gss_cat %>% ggplot(mapping = aes(x = rincome)) + geom_bar()
+rincome_bar
+```
+
+The bar plot is hard to read because the labels all overlap each other on the x axis. To fix this, I will make the labels verticle.
+
+```{r}
+rincome_bar + theme(axis.text.x = element_text(angle = 90))
+```
+
+##  Exercise 3
+```{r}
+levels(gss_cat$denom)
+```
+
+The denom column is tied to the Protestant relig. Using the table, showing the levels of denom, it is clear the column is connected with the Protestant religion.
+
+```{r}
+denom_vis <- gss_cat %>% count(denom, relig) %>% ggplot(mapping = aes(x = relig, y = denom)) + geom_point() + theme(axis.text.x = element_text(angle = 90))
+denom_vis
+```
+
+Plotting relig against denom gives a clear picture where the relationship is. All the denominations are matched to the Protestant relig.
+
+# Chapter 12 (Pg. 232)
+
+##  Exercise 2
+```{r}
+levels(gss_cat$marital)
+levels(gss_cat$race)
+levels(gss_cat$rincome)
+levels(gss_cat$partyid)
+levels(gss_cat$relig)
+levels(gss_cat$denom)
+```
+
+The rincome, race, martial, and partyid variables are principaled. They are ordered in a specific way. Relig and denom are arbitrary. There is no reasoning behind how the answers are sorted.
+
+# Chapter 12 (Pg. 235)
+
+##  Exercise 1
+```{r}
+gss_cat %>% mutate(partyid = fct_collapse(partyid, Republican = c("Strong republican", "Not str republican"), Independent = c("Ind,near rep", "Independent", "Ind,near dem"), Democrat = c("Not str democrat", "Strong democrat"), Other = c("No answer", "Don't know", "Other party"))) %>% count(year, partyid) %>% group_by(year) %>% mutate(proportion = n / sum(n)) %>% ggplot(aes(x = year, y = proportion, color =partyid)) + geom_line()
+```
+
+##  Exercise 2
+```{r}
+gss_cat %>% mutate(rincome = fct_collapse(rincome, 'Unknown' = c("Don't know", "No answer", "Not applicable", "Refused"), '>$5000' = c("Lt $1000", str_c("$", c("1000", "3000", "4000"), " to ", c("2999", "3999", "4999"))), '$5000 to 10000' = str_c("$", c("5000", "6000", "7000", "8000"), " to ", c("5999", "6999", "7999", "9999")), '$10000 to 25000' = str_c("$", c("10000", "15000", "20000"), " - ", c("14999", "19999", "24999")))) %>% ggplot(aes(x = rincome)) + geom_bar() + coord_flip()
+```

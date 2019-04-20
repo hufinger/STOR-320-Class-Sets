@@ -1,7 +1,7 @@
 ---
 title: "Lab 2"
-author: "Mario Giacomazzo"
-date: "August 25, 2018"
+author: "Hunter Finger"
+date: "`r format(Sys.time(), '%B %d, %Y')`"
 output: html_document
 ---
 
@@ -13,9 +13,9 @@ knitr::opts_chunk$set(echo = TRUE)
 
 **Exercises:**  1-3 (Pgs. 49-50); 2-4 (Pg. 51); 2,4 (Pg. 54); 1-4 (Pg. 58)
 
-**Assigned:** Friday, August 31, 2018
+**Assigned:** Friday, January 18, 2019
 
-**Due:** Friday, September 7, 2018 by 5:00 PM
+**Due:** Friday, January 25, 2019 by 5:00 PM
 
 **Submission:** Submit via an electronic document on Sakai. Must be submitted as a html file generated in RStudio. All assigned problems are chosen according to the textbook *R for Data Science*. 
 
@@ -29,66 +29,109 @@ library(nycflights13)
 
 ##  Exercise 1
 ```{r}
-#
+filter(flights, arr_delay >= 120) 
+filter(flights, dest == "IAH" | dest == "HOU")
+filter (flights, carrier == "UA" | carrier == "DL" | carrier == "AA")
+filter(flights, month %in% c(7, 8, 9))
+filter(flights, arr_delay >= 120, dep_delay<= 0)
+filter(flights, (dep_delay - arr_delay) >= 30, dep_delay >= 60)
+filter(flights, dep_time == 2400 | dep_time <= 600)
 ```
 
 ##  Exercise 2
+The only question that can be solved better with the **between()** function is part **d**.
 ```{r}
-#
+filter(flights, between(month, 7, 9))
 ```
 
 ##  Exercise 3
 ```{r}
-#
+filter(flights, is.na(dep_time))
 ```
+These flights could have been **cancelled** for weather or other reasons because there is no arrival time or other flight data.
 
 # Chapter 3 (Pg. 51)
 
 ##  Exercise 2
 ```{r}
-#
+arrange(flights, desc(dep_delay))
+arrange(flights, dep_time)
 ```
-
 ##  Exercise 3
 ```{r}
-#
+arrange(flights, air_time)
 ```
 
 ##  Exercise 4
 ```{r}
-#
+arrange(flights, desc(distance))
+arrange(flights, distance)
 ```
 
 # Chapter 3 (Pg. 54)
 
 ##  Exercise 2
 ```{r}
-#
+select(flights, month, month)
 ```
+Select ignored the duplicate call.
 
 ##  Exercise 4
 ```{r}
-#
+select(flights, contains("TIME"))
+```
+The result did not surprise me because contains ignores case, much like the contains function in many other languages. Ignoring the case is the default for contains(). The way to make contains case-sensitive is shown below.
+```{r}
+select(flights, contains("TIME", ignore.case = F))
 ```
 
 # Chapter 3 (Pg. 58)
 
 ##  Exercise 1
 ```{r}
-#
+flight_time <- mutate(flights,
+  dep_time_in_mins = (dep_time %/% 100 * 60 + dep_time %% 100) %% 1440,
+  sched_dep_time_in_mins = (sched_dep_time %/% 100 * 60 +
+    sched_dep_time %% 100) %% 1440
+)
 ```
 
 ##  Exercise 2
+
+The two times should be the same. 
 ```{r}
-#
+flight_air <- mutate(flights,
+sched_dep_time_in_mins = (sched_dep_time %/% 100 * 60 +
+    sched_dep_time %% 100) %% 1440,
+
+dep_time_in_mins = (dep_time %/% 100 * 60 + dep_time %% 100) %% 1440,
+
+dif_air = air_time - arr_time+dep_time
+)
+
+filter(flight_air, dif_air != 0)
+
 ```
 
 ##  Exercise 3
+
+dep_delay should equal dep_time - sched_dep_time 
 ```{r}
-#
+flights_deptime <-
+  mutate(flights,
+    dep_time_in_min = (dep_time %/% 100 * 60 + dep_time %% 100) %% 1440,
+    sched_dep_time_in_min = (sched_dep_time %/% 100 * 60 +
+      sched_dep_time %% 100) %% 1440,
+    dep_delay_dif = dep_delay - dep_time_in_min + sched_dep_time_in_min
+  )
 ```
+The differnces are probably because a flight that was schedule to take off just before midnight took off after midnight. 
 
 ##  Exercise 4
 ```{r}
-#
+delayed_flights <- mutate(flights, ordered_delay = min_rank(-dep_delay))
+
+delayed_flights <- filter(delayed_flights, ordered_delay < 10)
+
+arrange(delayed_flights, ordered_delay)
 ```

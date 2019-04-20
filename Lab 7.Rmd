@@ -1,0 +1,76 @@
+---
+title: "Lab 7"
+author: "Hunter Finger"
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Instructions
+
+**Exercises:**  1,4 (Pg. 358); 1,4 (Pgs. 371)
+
+**Assigned:** Friday, March 29, 2019
+
+**Due:** Friday, April 5, 2019 by 5:00 PM
+
+**Submission:** Submit via an electronic document on Sakai. Must be submitted as a HTML file generated in RStudio. All assigned problems are chosen according to the textbook *R for Data Science*. You do not need R code to answer every question. If you answer without using R code, delete the code chunk. If the question requires R code, make sure you display R code. If the question requires a figure, make sure you display a figure. A lot of the questions can be answered in written response, but require R code and/or figures for understanding and explaining.
+
+```{r, include=FALSE}
+library(tidyverse)
+library(modelr)
+library(modelr)
+library(purrr)
+library(broom)
+library(glmnet)
+```
+
+
+# Chapter 18 (Pg. 358)
+
+##  Exercise 1
+```{r}
+mod1_loess = loess(y ~ x, data = sim1)
+mod1_lm = lm(y~x, data = sim1)
+
+grid_loess = sim1 %>% add_predictions(mod1_loess)
+grid_lm = sim1 %>% add_predictions(mod1_lm)
+sim1 = sim1 %>% add_predictions(mod1_lm, var = "lm_pred") %>% add_residuals(mod1_lm, var = "lm_res") %>% add_predictions(mod1_loess) %>% add_residuals(mod1_loess)
+
+ggplot(sim1, aes(x = x, y=y)) + geom_point()+geom_line(aes(x = x, y = pred), data = grid_loess, color = "red")
+ggplot(sim1, aes(x = x, y=y)) + geom_point()+geom_line(aes(x = x, y = pred), data = grid_lm, color = "blue")
+
+ggplot(sim1, aes(x=x)) + geom_point(aes(y = lm_res), color = "red") + geom_point(aes(y = resid), color = "black")
+```
+
+##  Exercise 4
+
+The reason you would want to use the absolute residuals is because you can see all the residuals as positives and it is easier to see how far off the model is. However, you cannot see if you are mostly over or underestimating the true values since all the residuals are shown as positives.
+
+# Chapter 18 (Pg. 371)
+
+##  Exercise 1
+```{r}
+mod_a = lm(y~x-1, data = sim2)
+mod_b = lm(y~x, data = sim2)
+
+grid_show = sim2 %>% data_grid(x) %>% spread_predictions(mod_a, mod_b)
+grid_show
+```
+
+The predictions are the same with and without the intercept.
+
+##  Exercise 4
+```{r}
+mod1 = lm(y~x1+x2, data = sim4)
+mod2 = lm(y~x1*x2, data = sim4)
+
+mod_res = gather_residuals(sim4, mod1, mod2)
+
+ggplot(mod_res, aes(x = resid, color = model)) + geom_freqpoly(binwidth = .25)
+```
+
+The mod2 residuals appear to be more accurate overall than the mod1 residuals. This can be seen by the slight count difference on the positive residuals and also the mod2 residual counts near 0 being higher.
